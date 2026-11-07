@@ -1,0 +1,241 @@
+# Monzo voice rules
+# Source: Monzo Writing Principles, https://monzo.com/tone-of-voice (fetched 2026-11-06)
+#
+# Every rule records:
+#   basis: stated   -> the guide says this directly
+#          inferred -> our reading of a stated principle, turned into a checkable rule
+#   source: the guide section it comes from
+# Levels: error (clear break of a stated rule), warning (likely problem), suggestion (worth a look)
+
+meta:
+  brand: Monzo
+  source_url: https://monzo.com/tone-of-voice
+  fetched: 2026-11-06
+
+# Channel dials, copied from "How we sound across channels"
+channels:
+  operational:      {kindness: max,  magic: low,    wit: none}
+  customer_service: {kindness: high, magic: low,    wit: none}
+  marketing:        {kindness: high, magic: medium, wit: medium}
+  campaign:         {kindness: high, magic: high,   wit: high}
+  paid_social:      {kindness: high, magic: high,   wit: high}
+  organic_social:   {kindness: high, magic: high,   wit: max}
+
+rules:
+
+  - id: FormalWords
+    principle: Straightforward kindness
+    source: Swap formal words for normal ones
+    basis: stated
+    level: warning
+    type: swap
+    message: "Formal word. Monzo's guide swaps '{match}' for '{fix}'."
+    swap:
+      assistance: help
+      require: need
+      requires: needs
+      required: needed
+      enable: let
+      enables: lets
+      obtain: get
+      provide: give
+      provides: gives
+      request: ask
+      resolve: fix
+      resolved: fixed
+      therefore: so
+      utilise: use
+      utilize: use
+
+  - id: HoweverOpening
+    principle: Straightforward kindness
+    source: Swap formal words for normal ones
+    basis: stated
+    level: warning
+    type: pattern
+    # Only sentence-opening 'However,' - 'however you like' is fine
+    pattern: '(?:^|(?<=[.!?]\s))However,'
+    case_sensitive: true
+    message: "Monzo's guide swaps 'However' for 'But' (and it's fine to start a sentence with 'But')."
+
+  - id: FormalApology
+    principle: Straightforward kindness
+    source: When we have to say sorry, say it sincerely
+    basis: stated
+    level: error
+    type: pattern
+    pattern: "\\b(?:we(?:'d| would) like to apologi[sz]e|we apologi[sz]e|please accept our apolog(?:y|ies)|apologi[sz]e for any inconvenience)\\b"
+    message: "The guide says: 'It's never ‘We'd like to apologise’, it's ‘We're sorry’.'"
+
+  - id: OverApology
+    principle: Straightforward kindness
+    source: When we have to say sorry, say it sincerely
+    basis: stated
+    level: warning
+    type: count
+    pattern: "\\b(?:sorry|apologi[sz]e|apologies)\\b"
+    max: 1
+    message: "Sorry appears {count} times. The guide says to say sorry once, then focus on making things better."
+
+  - id: LabelsMatter
+    principle: Straightforward kindness
+    source: Labels matter more than you think
+    basis: stated
+    level: error
+    type: swap
+    message: "Monzo uses '{fix}' instead of '{match}'."
+    swap:
+      blacklist: blocklist
+      blacklisted: blocklisted
+      whitelist: allowlist
+      whitelisted: allowlisted
+
+  - id: InclusiveTerms
+    principle: Straightforward kindness
+    source: Be welcoming to everyone
+    basis: inferred
+    level: suggestion
+    type: swap
+    message: "Possibly gendered or ableist term. Consider '{fix}'."
+    swap:
+      guys: folks
+      manpower: people
+      "sanity check": quick check
+      crazy: surprising
+      "fall on deaf ears": go unheard
+      "blind spot": gap
+
+  - id: PassiveVoice
+    principle: Straightforward kindness
+    source: "Avoid ambiguity: write in the active voice"
+    basis: stated
+    level: warning
+    type: passive
+    message: "Passive voice ('{match}'). The guide asks you to say who did it, e.g. 'We've decided to decline your application'."
+
+  - id: Jargon
+    principle: Straightforward kindness
+    source: Watch out for jargon
+    basis: inferred
+    level: suggestion
+    type: acronym
+    message: "'{match}' ({expansion}) isn't explained on the page. The guide says there's 'no room at all for unexplained financial jargon'."
+    # Financial terms checked for a plain explanation somewhere on the page.
+    terms:
+      APR: annual percentage rate
+      AER: annual equivalent rate
+      EAR: effective annual rate
+      FSCS: Financial Services Compensation Scheme
+      LISA: Lifetime ISA
+      SIPP: self-invested personal pension
+      ETF: exchange-traded fund
+      CCJ: county court judgment
+      CHAPS: Clearing House Automated Payment System
+      BACS: Bankers' Automated Clearing Services
+      IBAN: international bank account number
+      FCA: Financial Conduct Authority
+      PRA: Prudential Regulation Authority
+      FOS: Financial Ombudsman Service
+      OCF: ongoing charges figure
+
+  - id: EmptyAdjectives
+    principle: Everyday magic
+    source: Avoid empty adjectives & marketing cliches
+    basis: stated
+    level: suggestion
+    type: words
+    message: "'{match}' is on the guide's list of adjectives to remove. Say what makes it so."
+    words: [great, fun, simple, helpful, quick, easy, handy]
+
+  - id: CrutchWords
+    principle: Everyday magic
+    source: Avoid empty adjectives & marketing cliches
+    basis: stated
+    level: suggestion
+    type: words
+    message: "'{match}' is on the guide's list of words to avoid."
+    words: [simply, discover, discovers, "and much more", "and so much more"]
+
+  - id: Just
+    principle: Everyday magic
+    source: Avoid empty adjectives & marketing cliches
+    basis: stated
+    level: suggestion
+    type: pattern
+    # Guide's example: 'Just share your link with a friend' - flag 'just' before a verb-like word,
+    # not 'just now' / 'just under £100'
+    pattern: "\\bjust (?!now\\b|under\\b|over\\b|about\\b|before\\b|after\\b|in case\\b|like\\b|as\\b|a\\b|an\\b|the\\b|one\\b|£|\\d)\\w+"
+    message: "'just' is on the guide's list of words to avoid (as in 'Just share your link with a friend')."
+
+  - id: ClichePhrases
+    principle: Everyday magic
+    source: Avoid empty adjectives & marketing cliches
+    basis: stated
+    level: warning
+    type: pattern
+    pattern: "\\b(?:we've made it (?:even )?easier to|we designed \\w+(?: \\w+){0,3} to|ever wanted to|whether you want to \\w+(?: \\w+){0,5} or)\\b"
+    message: "The guide lists this as a phrase to get rid of."
+
+  - id: LiteralMagic
+    principle: Everyday magic
+    source: Don't make literal references to magic
+    basis: stated
+    level: warning
+    type: pattern
+    exempt_channels: []
+    pattern: "(?:\\bhey presto\\b|\\babracadabra\\b|\\bmagic(?:al|ally)?\\b|\\bwizardry\\b|\\bwand\\b|\\bhogwarts\\b|🪄)"
+    message: "Literal magic reference. The guide says magic should come from craft, not 'phrases like ‘hey presto’' or the wand emoji."
+
+  - id: BannedPuns
+    principle: Warm wit
+    source: Smart asides, not cheap puns and cliches
+    basis: stated
+    level: error
+    type: pattern
+    pattern: "\\b(?:eggcellent|egg-cellent|all wrapped up|no tricks,? just treats)\\b"
+    message: "The guide names this pun as off limits."
+
+  - id: PunchingDown
+    principle: Warm wit
+    source: Contextual moments, not stereotypical tropes
+    basis: stated
+    level: error
+    type: pattern
+    pattern: "\\beven your (?:mum|mom|nan|gran|grandma|dad) (?:could|can)\\b"
+    message: "The guide says: we don't make jokes about how Monzo is so simple 'even your mum could use it'."
+
+  - id: WitInWrongChannel
+    principle: Warm wit
+    source: How we sound across channels
+    basis: inferred
+    level: warning
+    type: channel_wit
+    # Signals of a joke or flourish. Only checked where the channel dial says wit: none.
+    pattern: "(?:!{1,}|😂|🤣|😜|😉|🎉|🥳|\\blol\\b|\\bhaha\\b|\\bpun intended\\b)"
+    message: "Wit signal '{match}' in a {channel} channel. The guide sets warm wit to 'None' here."
+
+  - id: SentenceLength
+    principle: Straightforward kindness
+    source: "Monzo blog: 'Keep your writing short' (product writing)"
+    basis: inferred
+    level: suggestion
+    type: sentence_length
+    max_words: 25
+    message: "Sentence is {count} words. Monzo's product-writing principles say to keep writing short."
+
+  - id: Consistency
+    principle: Straightforward kindness
+    source: "Monzo blog: 'Be consistent' (product writing)"
+    basis: inferred
+    level: warning
+    type: consistency
+    message: "'{match}' is written {count} different ways on this page: {variants}."
+    terms:
+      - stocks and shares ISA
+      - cash ISA
+      - general investment account
+      - instant access
+      - savings pot
+      - lifetime ISA
+      - junior ISA
+      - ready-made fund

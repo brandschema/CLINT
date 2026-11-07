@@ -1,0 +1,31 @@
+# Claim register: facts that should read the same on every page.
+# 'pattern' captures the stated value. 'confirmed' stays null until Monzo confirms the true value.
+claims:
+  - id: FundCount
+    label: Number of investments on offer
+    pattern: "(?:have|has|choose from|offer)\\s+(\\d+)\\s+(?:investments|funds)"
+    confirmed: null
+  - id: PlatformFee
+    label: Yearly platform fee
+    pattern: "(\\d+(?:\\.\\d+)?%)\\s+(?:yearly|annual|platform)\\s+fee"
+    confirmed: null
+  - id: FeeCap
+    label: Yearly fee cap
+    pattern: "cap (?:your )?(?:investment )?fees at\\s+(£[\\d,]+)"
+    confirmed: null
+  - id: ISAAllowance
+    label: Yearly ISA allowance
+    pattern: "(?:invest )?up to\\s+(£20,000|£[\\d,]+)\\s+(?:a|each|per)\\s+(?:year|tax year)"
+    confirmed: null
+  - id: FSCSInvestments
+    label: FSCS limit for investments
+    pattern: "(?:investments are protected up to|protects? (?:some |your )?(?:eligible )?investments up to(?: a value of)?)\\s+(£\\d{1,3}(?:,\\d{3})*)"
+    confirmed: null
+  - id: MinimumInvestment
+    label: Minimum to invest
+    pattern: "as little as\\s+(£\\d{1,3}(?:,\\d{3})*(?:\\.\\d+)?)"
+    confirmed: null
+  - id: MinimumTerm
+    label: Suggested minimum time to invest
+    pattern: "(?:at least|minimum of)\\s+(\\d+|five|three|ten)\\s+years"
+    confirmed: null
