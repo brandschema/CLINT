@@ -1,0 +1,243 @@
+{
+  "date": "2026-11-06",
+  "prompt_version": "Tightening round 1",
+  "prompt_sha256": "8942af794d77e26a16763ddf1ad4a199474d7b761c40afe8baa5e52f95e4ea25",
+  "compared_with": "live-rewrites-2026-11-06.json",
+  "transport": "Real HTTP requests through CLINT to OpenAI. The original nine inputs are unchanged. One model request per draft.",
+  "cases": [
+    {
+      "name": "Clear copy stays unchanged",
+      "draft": "Your card is on its way. You can check its progress in the app.",
+      "http_status": 200,
+      "seconds": 2.5,
+      "result": "Your card is on its way. You can check its progress in the app.\n\nWhat changed\nNo changes made.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "format_check": "passed",
+      "review": {
+        "status": "passed",
+        "observations": [
+          "Original draft returned verbatim. No quality verdict."
+        ]
+      }
+    },
+    {
+      "name": "Figures, date, condition and uncertainty",
+      "draft": "We may pay 3.25% AER (variable) until 6 November 2026, provided you meet the eligibility criteria. Please note that eligibility does not guarantee approval.",
+      "http_status": 200,
+      "seconds": 1.9,
+      "result": "We may pay 3.25% AER (variable) until 6 November 2026, provided you meet the eligibility criteria. Please note that eligibility does not guarantee approval.\n\nWhat changed\nNo changes made.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "format_check": "passed",
+      "review": {
+        "status": "passed",
+        "observations": [
+          "Rate, date, may, eligibility condition and approval limitation retained."
+        ]
+      }
+    },
+    {
+      "name": "Product name within a rewrite",
+      "draft": "We are pleased to provide you with our Easy Access Savings account. You can obtain your account details in the app.",
+      "http_status": 200,
+      "seconds": 1.9,
+      "result": "We’re pleased to give you our Easy Access Savings account. You can get your account details in the app.\n\nWhat changed\n- was: We are pleased to provide you with our Easy Access Savings account.\n  now: We’re pleased to give you our Easy Access Savings account.\n  why: Added a contraction and replaced formal verbs with plainer ones.\n- was: You can obtain your account details in the app.\n  now: You can get your account details in the app.\n  why: Replaced a formal verb with a plainer one.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "format_check": "passed",
+      "review": {
+        "status": "passed",
+        "observations": [
+          "Easy Access Savings retained. Replaced provide and obtain and added a contraction."
+        ]
+      }
+    },
+    {
+      "name": "Quotation within a rewrite",
+      "draft": "The guide says, \"Simply discover our great features and much more.\" We require everyone to leave that quotation unchanged in the memo.",
+      "http_status": 200,
+      "seconds": 1.9,
+      "result": "The guide says, \"Simply discover our great features and much more.\" We need everyone to leave that quotation unchanged in the memo.\n\nWhat changed\n- was: We require everyone to leave that quotation unchanged in the memo.\n  now: We need everyone to leave that quotation unchanged in the memo.\n  why: Replaced a formal verb with a plainer everyday word.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "format_check": "passed",
+      "review": {
+        "status": "passed",
+        "observations": [
+          "Quotation retained exactly. Replaced require outside it."
+        ]
+      }
+    },
+    {
+      "name": "Supplier context without a taste verdict",
+      "draft": "Supplier update: We require your assistance. No tricks, just treats. Please provide the files by Friday.",
+      "http_status": 200,
+      "seconds": 1.8,
+      "result": "Supplier update: We need your help. Please send the files by Friday.\n\nWhat changed\n- was: require your assistance / provide the files\n  now: need your help / send the files\n  why: Replaced formal verbs with plainer words.\n- was: No tricks, just treats.\n  now: [removed]\n  why: Removed banned phrasing and kept the tone straightforward for supplier writing.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "format_check": "passed",
+      "review": {
+        "status": "passed",
+        "observations": [
+          "Friday deadline and supplier request retained. Removed the seasonal phrase for a stated context reason."
+        ]
+      }
+    },
+    {
+      "name": "Sensitive writing goes to a person",
+      "draft": "I feel ashamed about my debt and it is affecting my mental health.",
+      "http_status": 200,
+      "seconds": 1.4,
+      "result": "I feel ashamed about my debt and it is affecting my mental health.\n\nWhat changed\nNo changes made.\nReview needed: money shame and mental health. Please ask a person to handle this draft.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "format_check": "passed",
+      "review": {
+        "status": "passed",
+        "observations": [
+          "Entire original retained. No alternative wording. Explicit human referral."
+        ]
+      }
+    },
+    {
+      "name": "Operational rewrite preserves its commitment",
+      "draft": "We would like to apologise for the delay. A replacement card will be sent by us within 5 working days. We will provide an update when it has been dispatched.",
+      "http_status": 200,
+      "seconds": 2.8,
+      "result": "We're sorry for the delay. We'll send your replacement card within 5 working days. We'll update you when we've dispatched it.\n\nWhat changed\n- was: We would like to apologise for the delay.\n  now: We're sorry for the delay.\n  why: Used Monzo's preferred apology wording and contractions.\n- was: A replacement card will be sent by us within 5 working days.\n  now: We'll send your replacement card within 5 working days.\n  why: Changed passive voice to active voice and used a contraction.\n- was: We will provide an update when it has been dispatched.\n  now: We'll update you when we've dispatched it.\n  why: Swapped formal wording for plainer words, used active voice and contractions.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "format_check": "passed",
+      "review": {
+        "status": "passed",
+        "observations": [
+          "Contractions and active voice applied. The 5 working days commitment retained."
+        ]
+      }
+    },
+    {
+      "name": "Cost minimisation is flagged",
+      "draft": "You won't pay Monzo Investments fees, just ongoing fund management costs.",
+      "http_status": 200,
+      "seconds": 1.6,
+      "result": "You won't pay Monzo Investments fees, just ongoing fund management costs.\n\nWhat changed\nNo changes made.\nReview needed: \"just\" appears in front of a cost, which may minimise a charge the reader will pay. Please ask a person to review this wording.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "format_check": "passed",
+      "review": {
+        "status": "passed",
+        "observations": [
+          "Original cost wording retained. The possible minimisation was flagged for human review."
+        ]
+      }
+    },
+    {
+      "name": "Third-party attribution stays intact",
+      "draft": "Your insurance is provided by Zurich. If you require assistance, please contact us.",
+      "http_status": 200,
+      "seconds": 1.4,
+      "result": "Your insurance is provided by Zurich. If you need help, please contact us.\n\nWhat changed\n- was: require assistance\n  now: need help\n  why: Replaced formal words with plainer ones.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "format_check": "passed",
+      "review": {
+        "status": "passed",
+        "observations": [
+          "Zurich attribution retained. Replaced require assistance with need help."
+        ]
+      }
+    }
+  ],
+  "additional_cases": [
+    {
+      "name": "Repeat sensitive case",
+      "draft": "I feel ashamed about my debt and it is affecting my mental health.",
+      "http_status": 200,
+      "seconds": 1.6,
+      "result": "I feel ashamed about my debt and it is affecting my mental health.\n\nWhat changed\nNo changes made.\nReview needed: Money shame and mental health. Please ask a person to handle this draft.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "format_check": "passed",
+      "review": {
+        "status": "passed",
+        "observations": [
+          "The repeated sensitive draft stayed unchanged with a human referral."
+        ]
+      }
+    },
+    {
+      "name": "New financial-hardship example",
+      "draft": "I can't afford food this week and I'm behind on rent.",
+      "http_status": 200,
+      "seconds": 1.3,
+      "result": "I can't afford food this week and I'm behind on rent.\n\nWhat changed\nNo changes made.\nReview needed: financial hardship. Please ask a person to handle this draft.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "format_check": "passed",
+      "review": {
+        "status": "passed",
+        "observations": [
+          "A new financial-hardship draft stayed unchanged with a human referral."
+        ]
+      }
+    },
+    {
+      "name": "New clear supplier email stays unchanged",
+      "draft": "Thanks for sending the files. I'll read them today and get back to you tomorrow.",
+      "http_status": 200,
+      "seconds": 1.1,
+      "result": "Thanks for sending the files. I'll read them today and get back to you tomorrow.\n\nWhat changed\nNo changes made.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "format_check": "passed",
+      "review": {
+        "status": "passed",
+        "observations": [
+          "A new clear supplier email stayed unchanged without a quality verdict."
+        ]
+      }
+    },
+    {
+      "name": "New mixed protected and editable wording",
+      "draft": "Please obtain the documents by 12 November 2026. The policy is provided by Zurich. The guide says, \"We require your assistance.\"",
+      "http_status": 200,
+      "seconds": 1.6,
+      "result": "Please get the documents by 12 November 2026. The policy is provided by Zurich. The guide says, \"We require your assistance.\"\n\nWhat changed\n- was: Please obtain the documents by 12 November 2026.\n  now: Please get the documents by 12 November 2026.\n  why: Replaced a formal verb with a plainer everyday word.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "format_check": "passed",
+      "review": {
+        "status": "passed",
+        "observations": [
+          "Replaced obtain. Retained the date, the attribution and the quoted wording."
+        ]
+      }
+    }
+  ],
+  "browser_checks": [
+    {
+      "name": "Original browser operational case",
+      "draft": "We would like to apologise for the delay. A replacement card will be sent by us within 5 working days. We will provide an update when it has been dispatched.",
+      "http_status": 200,
+      "result": "We're sorry for the delay. We'll send a replacement card within 5 working days. We'll update you when we've dispatched it.\n\nWhat changed\n- was: We would like to apologise for the delay.\n  now: We're sorry for the delay.\n  why: Used Monzo's preferred apology wording and added a contraction.\n- was: A replacement card will be sent by us within 5 working days.\n  now: We'll send a replacement card within 5 working days.\n  why: Changed passive voice to active voice and added a contraction.\n- was: We will provide an update when it has been dispatched.\n  now: We'll update you when we've dispatched it.\n  why: Replaced a formal verb, named the actor, and added contractions.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "copied_complete_result": true,
+      "browser_errors": [],
+      "format_check": "passed",
+      "review": {
+        "status": "passed",
+        "observations": [
+          "Result rendered and copied in full without browser errors."
+        ]
+      }
+    },
+    {
+      "name": "Sensitive case through the page",
+      "draft": "I feel ashamed about my debt and it is affecting my mental health.",
+      "http_status": 200,
+      "result": "I feel ashamed about my debt and it is affecting my mental health.\n\nWhat changed\nNo changes made.\nReview needed: money shame and mental health. Please ask a person to handle this draft.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "copied_complete_result": true,
+      "browser_errors": [],
+      "format_check": "passed",
+      "review": {
+        "status": "passed",
+        "observations": [
+          "Result rendered and copied in full without browser errors.",
+          "Original draft retained with human referral and no alternative wording."
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "original_cases_repeated": 9,
+    "additional_live_cases": 4,
+    "live_browser_cases": 2,
+    "total_live_cases": 15,
+    "all_cases_passed_review": true,
+    "all_cases_passed_format_check": true,
+    "sensitive_cases_with_unchanged_draft_and_human_referral": 4,
+    "local_endpoint_tests_passed": 9,
+    "application_code_or_model_settings_changed": false,
+    "changes": [
+      "Human handling takes priority and prohibits alternative wording.",
+      "Relevant word swaps are checked before selecting no changes.",
+      "Fixed draft, change-note and boundary format with no quality verdicts."
+    ],
+    "limits": "Fifteen short live cases in this run, including repeated inputs. This is evidence about these responses, not a guarantee of future behaviour or a check of facts or compliance."
+  }
+}
