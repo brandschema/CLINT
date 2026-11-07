@@ -1,0 +1,39 @@
+{
+  "date": "2026-11-06",
+  "transport": "Real HTTP request through CLINT to OpenAI, using synthetic drafts",
+  "initial_connection_failure": {
+    "name": "Leave clear copy unchanged",
+    "draft": "Your card is on its way. You can check its progress in the app.",
+    "http_status": 403,
+    "seconds": 4,
+    "error": "Open CLINT in this browser to send a draft."
+  },
+  "cases": [
+    {
+      "name": "Leave clear copy unchanged",
+      "draft": "Your card is on its way. You can check its progress in the app.",
+      "http_status": 429,
+      "seconds": 3.6,
+      "error": "OpenAI can't take this request right now. Check your API credit or try again shortly."
+    }
+  ],
+  "provider_diagnostic": {
+    "http_status": 429,
+    "error_type": "insufficient_quota",
+    "error_code": "credit_balance_exhausted"
+  },
+  "writing_checks_completed": false,
+  "blocking_reason": "OpenAI reports no prepaid API credit remaining.",
+  "local_fixes": [
+    "Accepted the browser Host header when Next.js uses localhost internally.",
+    "Distinguished exhausted API credit from a temporary rate limit."
+  ],
+  "api_key_absent_from_browser_files": true,
+  "local_checks": {
+    "lint": "passed",
+    "production_build": "passed",
+    "endpoint_tests_passed": 9,
+    "browser_tests_passed": 10
+  },
+  "subsequent_status": "Credit issue resolved. Real rewrites completed in live-rewrites-2026-11-06.json. Earlier failures retained here as history."
+}

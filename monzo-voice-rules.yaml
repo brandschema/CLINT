@@ -1,0 +1,800 @@
+# Monzo voice: the rule set
+# 37 rules across five blocks. Companion to monzo-voice-channels.yaml.
+#
+# Every rule carries six fields:
+#   says          the rule
+#   because       the evidence or statement it rests on
+#   protects      the failure it prevents  -> read this before weakening it
+#   retires_when  the condition under which it should go
+#   check         string | count | pattern | model | none
+#   level         error | warning | prompt | never_flag
+# plus, where known:
+#   false_positive_rate / measured
+#
+# Output levels map to the measured error rate:
+#   under 10%  -> error      10-40% -> warning
+#   40-70%     -> prompt     over 70% -> do not ship, fix the check
+
+meta:
+  brand: monzo
+  source: monzo.com/tone-of-voice
+  corpus_collected: 2026-11-06
+  corpus: 50 pages, 1960 sentences, 33167 words, six registers
+  comparison: 4 UK competitors, 1390 sentences, 19684 words
+  gate: ">=5 words and terminal punctuation, <p> only. See measure-voice.js."
+  rules: 37
+  by_check: {string: 7, count: 5, pattern: 6, model: 18, none: 1}
+
+# Measured against Lloyds, Barclays, Revolut and Vanguard UK, three rules carry
+# the brand's entire measurable distinctiveness. Build these three first.
+core_three: [REG-1, STA-2, RHY-6]
+cosmetic: [RHY-2]   # sentence length: five brands inside 1.7 words on the mean
+
+# Applied before every string and pattern rule. Not optional.
+# Without the quotation exclusion, Monzo's own guidelines page returns 16 errors
+# and is wrong 16 times.
+exclusions:
+  quotation:
+    - quoted_span          # text inside ' or "
+    - blockquote
+    - code_span
+  product_names:           # case-sensitive: "Easy Access" is the product, "easy access" is a claim
+    - Easy Access Savings
+    - Easy Access Cash ISA
+    - Easy Bank Transfers
+    - Instant Access Savings Pot
+    - Fixed Rate Savings
+  attribution:
+    - pattern: 'provided by [A-Z]'            # "provided by Zurich" is insurance attribution
+    - pattern: '^[^.]{0,60}\brequired\.$'     # "Monzo current account required." is boilerplate
+
+# =====================================================================
+# REGISTER
+# =====================================================================
+rules:
+
+  - id: REG-1
+    block: register
+    says: No piece falls below 2.8 contractions per 100 words, in any channel, legal copy included.
+    because: >
+      One of the three measures that actually separates this brand from the field.
+      Monzo marketing 3.19 and legal 3.62, against Lloyds 1.97, Barclays 2.06 and
+      Vanguard 2.08. The floor sits above the competitor cluster rather than at it,
+      so it is a voice rule and not a hygiene rule. Monzo's help content (2.14) and
+      both blogs (1.96, 1.95) currently fail it, which is intended: on those
+      registers the voice is indistinguishable from the competition.
+    protects: >
+      The thing Monzo's guidelines are mostly about. Their argument against formal
+      vocabulary rests on sounding like a person, and the contraction is the cheapest
+      reliable signal of it.
+    retires_when: >
+      Monzo publishes a channel genuinely written for a regulator rather than a
+      customer, such as a prospectus. The rule was never aimed at those.
+    check: count
+    measure: contractions_per_100w
+    floor_from: channels.<channel>.contraction_floor_per_100w
+    min_words: 150                # ratio is unstable below this
+    level: warning
+    measured: true
+
+  - id: REG-2
+    block: register
+    says: >
+      When a piece delivers bad news, a charge, a refusal or a loss, its spokenness
+      is at or above the channel's normal level, never below.
+    because: >
+      Monzo instructs this directly: "When the subject is sensitive, that's even more
+      reason to focus on being warm and easy to understand."
+    protects: >
+      The reader at the moment they are least able to decode an evasive sentence, and
+      Monzo from sounding as though it is backing away from its own decision.
+    retires_when: never. This is the load-bearing register rule.
+    check: model
+    question: Does this carry bad news, a charge, a refusal or a loss?
+    then: compare contraction and passive rates against the channel baseline
+    level: warning
+    confidence: good
+    measured: false
+
+  - id: REG-3
+    block: register
+    says: >
+      Passive constructions stay at or below the channel ceiling. Editorial channels
+      are given marketing-like ceilings, not their own observed rates.
+    because: >
+      The three registers Monzo's matrix rates sit at 2.2, 4.1 and 6.6 per 100
+      sentences. The two it does not rate sit at 8.6 and 9.8.
+    protects: Named responsibility. Monzo frames the passive as hidden agency, not bad grammar.
+    retires_when: >
+      A register is found where the agent genuinely does not matter, such as a
+      statutory process with no actor. Yield one sentence at a time, never wholesale.
+    check: pattern
+    then: REG-3 candidates are passed to STA-2 for the agency judgement
+    pattern: '\b(is|are|was|were|be|been|being)\s+(\w+ed|given|taken|made|sent|held|paid|shown|known|seen|done|put|set|kept|found|told|left|built|brought|written|chosen|dealt|used|added|removed|charged|applied)\b'
+    level: prompt
+    note: over-reports heavily on its own; the model stage does the work
+    measured: true
+
+  - id: REG-4
+    block: register
+    says: Three sentences per paragraph maximum. Above that, break.
+    because: >
+      The 90th percentile is 3 sentences in all six registers across 1,920 paragraphs.
+      The most consistent number in the corpus.
+    protects: >
+      Readability on a phone, and the one-idea-per-paragraph shape Monzo's
+      bullets-first drafting instruction produces.
+    retires_when: >
+      A channel appears that is read at length at a desk. The brand page is arguably
+      already that channel and still holds a median of 2.
+    check: count
+    measure: sentences_per_paragraph
+    ceiling_from: channels.<channel>.paragraph_max_sentences
+    level: warning
+    false_positive_rate: 0.0
+    measured: true
+    note: only trap is a list rendered as a paragraph
+
+  - id: REG-5
+    block: register
+    says: >
+      Customer-facing copy addresses the reader. The you-to-we ratio stays above the
+      channel floor. Brand and technical editorial are exempt.
+    because: >
+      Marketing 5.8:1, customer service 2.9:1, legal 1.7:1. The only registers below
+      parity are the voice page (0.2:1) and the engineering blog (0.7:1), both of
+      which are Monzo talking about Monzo.
+    protects: >
+      Monzo's first writing question: what does the reader care about most. A piece
+      that drifts to a "we" subject has usually drifted to Monzo's concerns.
+    retires_when: The piece is genuinely about Monzo. Then the ratio inverts legitimately.
+    check: count
+    measure: you_to_we_ratio
+    floor_from: channels.<channel>.you_to_we_floor
+    requires: [channel, is_signed]
+    level: warning
+    measured: true
+
+# =====================================================================
+# STANCE
+# =====================================================================
+
+  - id: STA-1
+    block: stance
+    says: >
+      The first sentence states what has happened to the reader or what they can now
+      do. Monzo's reasoning, entitlement or process comes after.
+    because: >
+      Monzo's worked pair replaces "As a regulated bank, we hold the right to
+      intervene" with "We're here to keep your accounts and money safe". Same facts,
+      inverted order.
+    protects: >
+      The reader who stops after one sentence, which on a phone is most of them. Also
+      stops copy opening on Monzo's permission to act, which reads as a warning.
+    retires_when: The piece has no reader impact, such as a company or engineering post.
+    check: model
+    question: >
+      Does the first sentence state reader impact, reader action, Monzo's entitlement,
+      or Monzo's process?
+    flag_if: [monzo_entitlement, monzo_process]
+    level: warning
+    confidence: good
+    measured: false
+
+  - id: STA-2
+    block: stance
+    says: A reader who wants to know who performed an action can find out from the sentence.
+    because: >
+      Monzo frames the passive as unconscious distancing rather than bad grammar,
+      which makes the test about recoverable agency rather than voice.
+    protects: Accountability in the sentences where it is most tempting to drop it.
+    retires_when: >
+      The actor is genuinely outside Monzo and the sentence describes a protection
+      that does not arise from anything Monzo does. The FSCS clauses are the clear case.
+    check: model
+    input: REG-3 pattern candidates
+    question: In this passive sentence, can a reader recover who acted?
+    level: warning
+    confidence: good
+    measured: false
+
+  - id: STA-3
+    block: stance
+    says: >
+      One apology per piece, phrased "we're sorry" not "we'd like to apologise", and
+      no apology at all when Monzo has acted correctly.
+    because: All three are stated in Monzo's guidelines with reasoning for each.
+    protects: >
+      The sincerity of the apologies Monzo does make, and its regulatory position. An
+      apology attached to a correct decision states that the decision was wrong.
+    retires_when: >
+      Never for the phrasing and the count. The at-fault test needs a named exception
+      route for cases where legal or a regulator requires an apology Monzo does not
+      believe is owed. Record and approve those rather than arguing each time.
+    check: [string, count, model]
+    tests:
+      - match: ["we'd like to apologise", "we would like to apologise"]
+        level: error
+      - count: apologies_per_piece
+        ceiling: 1
+        level: warning
+      - question: Has Monzo actually done something wrong here?
+        level: prompt
+        route: ask_the_writer
+        confidence: poor
+        note: the copy is the thing under review; an apology in it is not evidence one is owed
+    exclusions: [quotation]
+    measured: false
+
+  - id: STA-4
+    block: stance
+    says: >
+      Monzo can be the butt of a joke about taste, habits or its own writing. Never
+      about carelessness with money, security or obligations.
+    because: >
+      "We can be the butt of the joke, but we don't want to make ourselves out to be
+      a victim. We're a big bank, we protect people's money."
+    protects: >
+      The trust the humour is spending. Self-deprecation is the cheapest likeability
+      and the most expensive for a custodian of money.
+    retires_when: never. This boundary is what makes the warm-wit principle safe to apply.
+    check: model
+    question: Does this imply Monzo is careless with money, security or obligations?
+    level: error
+    confidence: good
+    measured: false
+    see_also: HUM-4
+
+  - id: STA-5
+    block: stance
+    says: A signed piece by a named person uses "I". Institutional writing uses "we". Not mixed.
+    because: >
+      First person singular runs at 14.8 per 1,000 words in signed engineering and
+      hiring posts and effectively zero in all five other registers. The convention is
+      already clean and has no rule behind it.
+    protects: Whether a claim is the company's or a person's.
+    retires_when: >
+      Monzo starts publishing signed opinion in the brand voice. Then it becomes a
+      per-piece declaration rather than a default.
+    check: count
+    measure: both pronoun sets, flag a piece using each above a low threshold
+    requires: [is_signed]
+    level: warning
+    measured: true
+
+  - id: STA-6
+    block: stance
+    says: >
+      Money shame, mental health and financial hardship are not written about in the
+      brand voice. Carried in a customer's own words, or led by the vulnerable
+      customers team.
+    because: >
+      Monzo places all three off limits and gives the reason as who has standing,
+      not that the subject is difficult.
+    protects: >
+      Readers in those situations from a brand narrating their experience back to
+      them, and Monzo from claiming an authority it does not have.
+    retires_when: It does not. The list may grow; treat additions as the same kind of decision.
+    check: model
+    question: Is this about money shame, mental health or financial hardship?
+    level: error
+    route: hand_off_to_human       # not a rewrite suggestion
+    confidence: good
+    measured: false
+
+# =====================================================================
+# RHYTHM
+# =====================================================================
+
+  - id: RHY-1
+    block: rhythm
+    says: One to two sentences per paragraph in customer-facing copy, three at most.
+    because: 90th percentile is 3 sentences in all six registers.
+    protects: Reading on a phone; one idea per paragraph.
+    retires_when: A channel read at length at a desk appears.
+    check: count
+    level: warning
+    measured: true
+    note: same measurement as REG-4, stated here as the rhythm rule
+
+  - id: RHY-2
+    block: rhythm
+    says: >
+      Sentences above the channel's 90th percentile get looked at. Never a hard limit.
+    because: >
+      The top end of each distribution contains correct long sentences. A 54-word
+      help sentence carrying one financial condition and its consequence is right.
+    protects: >
+      The reader's working memory, without banning the one construction that needs
+      length.
+    retires_when: >
+      It does not retire, but it must never become an error. Breaking a condition
+      from its consequence in a savings product is where the risk sits.
+    check: count
+    measure: words_per_sentence
+    threshold_from: channels.<channel>.sentence_scrutiny_above
+    level: prompt
+    measured: true
+    note: >
+      DEMOTED from warning. Sentence length does not differentiate this brand.
+      Monzo 14.0, Lloyds 13.2, Barclays 14.5, Revolut 14.9, Vanguard 14.6 on the
+      mean. Keep the rule as a readability check and stop presenting it as a
+      voice rule. It is the one rule in the set that a competitor would pass.
+
+  - id: RHY-3
+    block: rhythm
+    says: No semicolons.
+    because: 7 in 2,846 sentences. None at all in help content, legal copy or consumer editorial.
+    protects: >
+      Nothing directly. It records a unanimous practice Monzo never wrote down, so it
+      survives a new writer who likes semicolons.
+    retires_when: >
+      Monzo decides it wants them. This is the most arbitrary rule in the set and is
+      labelled a convention, not a principle, so nobody defends it on grounds it
+      does not have.
+    check: string
+    match: [";"]
+    exclusions: [quotation, code_span]
+    level: error
+    false_positive_rate: 0.0
+    measured: true
+
+  - id: RHY-4
+    block: rhythm
+    says: >
+      Dashes belong in brand, marketing and editorial writing. Not in help content or
+      legal copy.
+    because: Help content 0.9 and legal copy 0.2 per 100 sentences, against brand 7.7 and marketing 5.2.
+    protects: >
+      The scannability of procedural copy, where a parenthetical interrupts a step the
+      reader is following.
+    retires_when: A dash is doing a job no other mark can do in that register. Rare in a numbered instruction.
+    check: pattern
+    pattern: '[—–]|\s-\s'
+    gated_by: channels.<channel>.dashes_permitted
+    level: prompt
+    measured: true
+
+  - id: RHY-5
+    block: rhythm
+    says: At most one exclamation mark per piece, and only on completion of a task the reader just finished.
+    because: >
+      Measured range 0.0 to 2.4 per 100 sentences. Legal copy has none. The
+      highest-rate examples are all task completions.
+    protects: >
+      The everyday-magic principle from its laziest expression. An exclamation mark is
+      usually standing in for a vivid verb the writer did not find.
+    retires_when: Social copy is measured and turns out to use them, which is likely.
+    check: count
+    ceiling_from: channels.<channel>.exclamations_per_piece
+    level: warning
+    measured: true
+    see_also: HUM-7
+
+  - id: RHY-6
+    block: rhythm
+    says: >
+      Starting a sentence with but, and, so or because is permitted in every register
+      including legal copy and is never flagged. Using however, therefore or moreover
+      instead is flagged.
+    because: >
+      Monzo grants the licence explicitly and uses it at 12.3% on the voice page.
+      The formal alternatives are on their own swap list. The engineering posts carry
+      8 "however" against 1 "but" opener.
+    protects: >
+      The spoken quality the licence exists to create. Catching the formal connective
+      is more useful than counting the informal one, whose rate legitimately varies
+      with how connected the prose is.
+    retires_when: It does not.
+    check: pattern
+    tests:
+      - match: [but, and, so, because]
+        position: sentence_initial
+        level: never_flag
+      - match: [however, therefore, moreover]
+        position: connective
+        level: warning
+        note: adverbial "however" ("separate your money however you like") is a false positive
+    exclusions: [quotation]
+    false_positive_rate: 0.13
+    measured: true
+
+# =====================================================================
+# VOCABULARY
+# =====================================================================
+
+  - id: VOC-1
+    block: vocabulary
+    says: blacklist becomes blocklist. whitelist becomes allowlist. No channel exemption, no override.
+    because: >
+      The only vocabulary rule in Monzo's guidelines with a reason that is not about
+      register. Filed under "labels matter more than you think".
+    protects: Readers for whom the term's history is not abstract, and Monzo from publishing it.
+    retires_when: Never. If the accepted replacement changes, the pair changes and the rule stays.
+    check: string
+    replace: {blacklist: blocklist, whitelist: allowlist}
+    exclusions: [quotation]
+    level: error
+    false_positive_rate: 0.0
+    measured: false            # zero occurrences in the corpus
+
+  - id: VOC-2
+    block: vocabulary
+    says: >
+      The ten formal swaps are prompts surfaced to the writer, not defects. "however"
+      is the exception and is a warning in its connective use.
+    because: >
+      Four of the ten (assistance, obtain, utilise, therefore) have reached zero
+      occurrences in 38,957 words. The rule works. The six that survive do so partly
+      through legitimate exceptions; "however" is the only one with none.
+    protects: The spoken register, which Monzo's whole vocabulary argument rests on.
+    retires_when: >
+      A word reaches zero occurrences across two consecutive audits. It has been
+      absorbed into the house style. Retiring earned rules keeps the set short enough
+      to be read.
+    check: string
+    swaps:
+      assistance: help
+      require: need
+      enable: let
+      obtain: get
+      provide: give
+      request: ask
+      resolve: fix
+      therefore: so
+      utilise: use
+      however: but
+    exclusions: [quotation, attribution]
+    level: prompt
+    false_positive_rate: 0.61       # provide family, as a plain string match
+    measured: true
+    observed:
+      provide_family: {raw: 18, real: 7}
+      require_family: {raw: 9, real: 4}
+      however: {raw: 8, real: 7}
+      request: {raw: 4, real: 3}
+      resolve: {raw: 2, real: 2}
+      enable: {raw: 2, real: 1}
+      zero_occurrences: [assistance, obtain, utilise, therefore]
+
+  - id: VOC-3
+    block: vocabulary
+    says: >
+      Flag great, fun, simple, helpful, quick, easy, handy when they sit directly
+      before a noun. Do not flag them as predicates or comparatives.
+    because: >
+      Of 48 occurrences, 19 are predicates and 5 are product names. "easy to
+      understand" and "as easy as possible" are both correct and both on the estate.
+      "handy tools" and "helpful ways" are the target.
+    protects: >
+      Specificity. Monzo's reasoning is that the words are writers' crutches and
+      removing them forces a better choice.
+    retires_when: >
+      It does not, but it always outputs a prompt rather than an error, because the
+      rule exists to create a constraint rather than prevent a mistake.
+    check: pattern
+    requires: part_of_speech_tagging
+    match: [great, fun, simple, helpful, quick, easy, handy]
+    position: attributive              # directly before a noun
+    exclusions: [quotation, product_names]
+    level: prompt
+    false_positive_rate: 0.42          # with a two-way regex split; 0.71 as a plain string
+    measured: true
+    note: >
+      The rule most damaged by regex and most improved by a tagger. "Have a pen,
+      paper, and basic calculator handy" is adverbial and fine. "You'll get handy
+      tools" is the target.
+
+  - id: VOC-4
+    block: vocabulary
+    says: >
+      Three separate tests on just and simply. Flag filler. Never flag meaningful use.
+      Route use before a cost to compliance.
+    because: >
+      58 occurrences: 21 filler, 11 meaningful, 26 minimising a quantity. A plain
+      string match is wrong or unhelpful 64% of the time.
+    protects: >
+      The first two tests protect the conversational register. The third protects
+      against minimising a cost the customer will pay, which is the one occurrence in
+      58 carrying regulatory exposure: "You won't pay Monzo Investments fees, just
+      ongoing fund management costs."
+    retires_when: >
+      The first two could retire if the filler rate approaches zero. The third should
+      not, and arguably belongs in the claim check rather than the voice linter.
+    check: pattern
+    tests:
+      - name: filler
+        pattern: '(?i)^just\b|\bjust\s+(\d|a few|a couple|remember|head|check|need|go|tap|open)'
+        level: prompt
+        action: suggest deletion
+      - name: meaningful
+        pattern: "(?i)\\b(not|don.t|doesn.t|isn.t|wasn.t|can.t|won.t|more than)\\s+just\\b|\\bjust\\s+(that|as|for|like|yet|about)\\b"
+        level: never_flag
+      - name: minimising_a_cost
+        pattern: '(?i)\bjust\s+[£$]?\d'
+        level: warning
+        route: compliance
+    exclusions: [quotation]
+    false_positive_rate: 0.64          # as a plain string match
+    measured: true
+
+  - id: VOC-5
+    block: vocabulary
+    says: Six named strings, never published.
+    because: >
+      Monzo names all six specifically. Four are seasonal puns ruled off limits, one
+      is the insincere apology, one is a joke that patronises.
+    protects: Against the specific failures Monzo has already decided it is tired of.
+    retires_when: The list grows rather than retires. Expect a new seasonal pun each year.
+    check: string
+    match:
+      - "We'd like to apologise"
+      - "Eggcellent"
+      - "all wrapped up"
+      - "no tricks, just treats"
+      - "hey presto"
+      - "even your mum could use it"
+    exclusions: [quotation]
+    level: error
+    measured: true
+    note: >
+      The guidelines page contains all four seasonal puns in the sentence banning
+      them. Without the quotation exclusion this rule fails its own source document.
+
+  - id: VOC-6
+    block: vocabulary
+    says: No "hey presto", no wand emoji, no describing a product or experience as magical.
+    because: >
+      "Everyday magic has to feel effortless and unexpected. Dropping the wand emoji
+      in or talking about how magical things are just undermines that."
+    protects: >
+      The principle from becoming a claim. A product described as magical has asserted
+      the thing it was supposed to deliver.
+    retires_when: It does not.
+    check: string
+    match: ["hey presto", "\U0001FA84"]
+    plus:
+      - question: does "magic" or "magical" describe a Monzo product or experience?
+        check: model
+        level: prompt
+    exclusions: [quotation]
+    level: error
+    measured: true
+    see_also: HUM-8
+
+# =====================================================================
+# HUMOUR AND WARMTH
+# =====================================================================
+
+  - id: HUM-1
+    block: humour
+    says: No humour in customer service or operational copy. Both are rated none.
+    because: >
+      Monzo states it as a risk calculation: "the risk of getting it wrong is greater
+      than the benefit of getting it right."
+    protects: Readers in difficulty, who are most of the audience for both channels.
+    retires_when: >
+      It does not. The guidelines already carve out the only exception they want,
+      "the occasional surprise in the app", so app copy needs its own setting once it
+      can be measured.
+    check: model
+    question: Does this contain anything a reader would take as a joke?
+    gated_by: channels.<channel>.jokes_per_piece == 0
+    level: error
+    confidence: moderate
+    measured: false
+    note: the highest-value single check in the humour set
+
+  - id: HUM-2
+    block: humour
+    says: One joke per piece, two at the outside. Undetermined for organic social.
+    because: >
+      "Even if the chance to make five excellent jokes is there, hold off and just
+      pick the best one (or maybe two)."
+    protects: The message. Also the humour, since the third joke devalues the first two.
+    retires_when: >
+      Organic social is measured. Rated maxed out for wit with no corpus, so the count
+      there is unknown rather than two.
+    check: model
+    question: How many jokes are in this piece?
+    ceiling_from: channels.<channel>.jokes_per_piece
+    level: warning
+    confidence: moderate
+    measured: false
+
+  - id: HUM-3
+    block: humour
+    says: The joke's target is never a person or group. Not the reader, not a category, not a spending behaviour.
+    because: >
+      Stated twice: not punching down, and not relying on unkind stereotypes or
+      sweeping judgements about people in a category of spending behaviour.
+    protects: Readers, and Monzo from a joke that lands on a fraction of 16 million people.
+    retires_when: It does not.
+    check: model
+    question: Is the joke's target a person or a group of people?
+    level: error
+    confidence: good
+    measured: false
+
+  - id: HUM-4
+    block: humour
+    says: Fallible about manner, never about competence.
+    because: Monzo states both halves. The second carries the risk.
+    protects: The trust the humour is spending.
+    retires_when: It does not.
+    check: model
+    level: error
+    confidence: good
+    measured: false
+    see_also: STA-4
+    note: a stance boundary expressed as a humour limit; the same check serves both
+
+  - id: HUM-5
+    block: humour
+    says: >
+      A joke sits in a bracketed aside or a clause at the end of a sentence. Deleting
+      it leaves the sentence working and the meaning intact.
+    because: >
+      Monzo's own device: "clever little side comments in brackets, or a quick note at
+      the end of a sentence." Bracket rate tracks the wit rating: 24.1 per 100
+      sentences in marketing against 8.6 in help content.
+    protects: >
+      The core message, by construction rather than discipline. A joke that cannot be
+      removed has become the sentence.
+    retires_when: >
+      Campaign headlines, where the joke is the whole line. Declare that exception
+      per piece.
+    check: [pattern, model]
+    pattern: '\([^)]{10,}\)|[—–][^.!?]{10,}[.!?]'
+    question: Does the sentence still work with the aside removed?
+    level: prompt
+    confidence: good
+    measured: false
+    note: >
+      A share of marketing brackets are rate qualifiers, not asides:
+      "2.80% AER (variable)". Bracket count alone cannot measure wit.
+
+  - id: HUM-6
+    block: humour
+    says: >
+      A cultural reference must be about as recognisable as the Barbie film, the
+      Olympics, Love Island or the ship stuck in the Suez canal. Organic social is exempt.
+    because: Monzo names those four as the calibration points and names a niche documentary or a TikTok-specific reference as the failures.
+    protects: >
+      Inclusion, specifically readers for whom English is not a first language, which
+      Monzo flags for idioms and which applies equally to references.
+    retires_when: >
+      The four examples age out. Barbie was 2023 and the Suez incident 2021. A dated
+      calibration set quietly tightens the rule over time. Refreshing it is a real
+      maintenance task.
+    check: model
+    calibration_set: [Barbie film, the Olympics, Love Island, the Suez canal ship]
+    level: warning
+    confidence: moderate
+    measured: false
+
+  - id: HUM-7
+    block: humour
+    says: >
+      At most one exclamation mark per piece, on a task just completed. Emoji are
+      effectively absent and stay that way outside social.
+    because: Measured range 0.0 to 2.4 per 100 sentences. One emoji in 38,957 words.
+    protects: The everyday-magic principle from its laziest expression.
+    retires_when: Social copy is measured and turns out to use them.
+    check: count
+    level: warning
+    measured: true
+    see_also: RHY-5
+
+  - id: HUM-8
+    block: humour
+    says: Never name the magic.
+    because: Naming it undermines it, the same logic as the empty-adjective rule.
+    protects: The principle from becoming a claim.
+    retires_when: It does not.
+    check: string
+    level: error
+    measured: true
+    see_also: VOC-6
+
+# =====================================================================
+# CHANNEL
+# =====================================================================
+
+  - id: CHA-1
+    block: channel
+    says: A piece is classified by what it is for. The medium does not set its channel.
+    because: >
+      Four media (emails, web pages, notifications, in-app) appear under both
+      operational comms and marketing comms in Monzo's matrix with contradictory wit
+      settings. Monzo resolves it in prose using purpose; the table cannot.
+    protects: >
+      Against the matrix's one structural defect. Without this rule a system reading
+      the table has to guess on the most common media Monzo publishes.
+    retires_when: >
+      Monzo rewrites the matrix so no medium appears twice. Worth recommending: a
+      half-hour fix on their side that removes the ambiguity at source.
+    check: model
+    question: What is this piece for? Pick one of five purposes.
+    uses: channels.classification
+    level: n/a
+    confidence: good
+    measured: false
+    note: never infer the channel from file type or URL
+
+  - id: CHA-2
+    block: channel
+    says: A piece whose channel cannot be established is checked against operational_legal.
+    because: >
+      Monzo's own override: "If the news could be considered in any way negative, or
+      if you're in any doubt, just keep it simple."
+    protects: >
+      Against a misclassified piece being allowed humour it should not have. The
+      failure mode runs toward plainness rather than toward a joke in the wrong place.
+    retires_when: It does not.
+    check: none
+    implementation: configuration default
+    measured: true
+
+  - id: CHA-3
+    block: channel
+    says: >
+      Campaigns, paid social, organic social and app copy have no settings. The linter
+      declines rather than applying marketing's numbers.
+    because: >
+      None is on monzo.com. Organic social is rated maxed out for wit, which is
+      further from marketing than marketing is from customer service.
+    protects: >
+      The credibility of every other setting. A linter that invents thresholds will be
+      caught doing it, and the invented ones discredit the measured ones.
+    retires_when: A corpus for that channel is collected.
+    check: none
+    on_request: return "not configured" with the reason. Never fall back silently.
+    measured: true
+
+  - id: CHA-4
+    block: channel
+    says: >
+      Consumer editorial is held to marketing's passive and vocabulary rates with
+      sentence length relaxed. Technical editorial keeps first-person singular and
+      longer sentences, and is held to the standard vocabulary and agency rules.
+    because: >
+      The two registers with no matrix entry carry the highest passive rates on the
+      estate, 9.8 and 8.6 against marketing's 2.2. The drift is in agency and
+      vocabulary, not in sentence length, which is legitimately different.
+    protects: >
+      Two published channels with no standard. The engineering blog is a recruitment
+      channel and reads nothing like the rest of the estate.
+    retires_when: Monzo adds its own rows to the matrix. Theirs replace these.
+    check: none
+    implementation: settings only
+    measured: false
+    note: these two settings are proposals, not findings. Labelled measured:false in the channels file.
+
+  - id: CHA-5
+    block: channel
+    says: Zero jokes in customer service and operational copy. Not reduced, zero.
+    because: Monzo rates both none and gives the reason as a risk calculation.
+    protects: Readers who are in difficulty.
+    retires_when: >
+      It does not, though "the occasional surprise in the app" sits outside this and
+      needs its own setting once app copy can be measured.
+    check: model
+    level: error
+    measured: false
+    see_also: HUM-1
+
+  - id: CHA-6
+    block: channel
+    says: The linter does not score kindness.
+    because: >
+      The matrix reads "high" in five rows of six, and the scale is never defined.
+      There is nothing to measure against. Several rules protect what kindness means
+      in practice (STA-1, STA-3, STA-6, REG-2) and those are checkable. The dial is not.
+    protects: >
+      Honesty about what the tool does. An invented kindness score would undermine the
+      measured numbers next to it.
+    retires_when: Monzo defines the scale.
+    check: none
+    measured: true
+    note: recorded so that its absence is a decision rather than an oversight

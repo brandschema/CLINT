@@ -1,0 +1,1 @@
+export const MAX_DRAFT_CHARACTERS = 20_000;

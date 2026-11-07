@@ -1,0 +1,153 @@
+{
+  "date": "2026-11-06",
+  "transport": "Real HTTP requests through CLINT to OpenAI with synthetic drafts. One model request per submitted draft.",
+  "cases": [
+    {
+      "name": "Clear copy stays unchanged",
+      "draft": "Your card is on its way. You can check its progress in the app.",
+      "http_status": 200,
+      "seconds": 3.5,
+      "result": "This already works in Monzo’s voice, so I’d leave it unchanged.\n\n**Your card is on its way. You can check its progress in the app.**\n\n**What changed**\n- Nothing. It’s clear, direct, active, and puts the most important point first.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "review": {
+        "status": "passed_content_check",
+        "observations": [
+          "The original words were retained.",
+          "Added quality commentary before the draft and in the note."
+        ]
+      }
+    },
+    {
+      "name": "Figures, date, condition and uncertainty",
+      "draft": "We may pay 3.25% AER (variable) until 6 November 2026, provided you meet the eligibility criteria. Please note that eligibility does not guarantee approval.",
+      "http_status": 200,
+      "seconds": 3.1,
+      "result": "This already works well in Monzo’s voice, so I’d leave it as it is.\n\nWe may pay 3.25% AER (variable) until 6 November 2026, provided you meet the eligibility criteria. Please note that eligibility does not guarantee approval.\n\nChanges made: none.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "review": {
+        "status": "passed_content_check",
+        "observations": [
+          "Preserved 3.25% AER (variable), 6 November 2026, may, the eligibility condition and the approval limitation."
+        ]
+      }
+    },
+    {
+      "name": "Product name within a rewrite",
+      "draft": "We are pleased to provide you with our Easy Access Savings account. You can obtain your account details in the app.",
+      "http_status": 200,
+      "seconds": 1.8,
+      "result": "This already works, so I’d leave it as is:\n\nWe are pleased to provide you with our Easy Access Savings account. You can obtain your account details in the app.\n\nWhat changed  \n- Nothing. It’s already clear and easy to follow.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "review": {
+        "status": "needs_change",
+        "observations": [
+          "Preserved Easy Access Savings.",
+          "Left provide and obtain unchanged despite the supplied swap list.",
+          "Added a verdict that the draft was clear and easy to follow."
+        ]
+      }
+    },
+    {
+      "name": "Quotation within a rewrite",
+      "draft": "The guide says, \"Simply discover our great features and much more.\" We require everyone to leave that quotation unchanged in the memo.",
+      "http_status": 200,
+      "seconds": 2.2,
+      "result": "This already works for Monzo’s voice, so I’d leave it unchanged:\n\nThe guide says, \"Simply discover our great features and much more.\" We require everyone to leave that quotation unchanged in the memo.\n\nWhat changed:\n- Nothing\n- Nothing\n- The quoted text should stay exactly as it is, and changing the rest isn’t needed to make the memo clearer.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "review": {
+        "status": "needs_change",
+        "observations": [
+          "Preserved the quotation exactly.",
+          "Left require unchanged outside the quotation.",
+          "The change note contained duplicate Nothing entries."
+        ]
+      }
+    },
+    {
+      "name": "Supplier context without a taste verdict",
+      "draft": "Supplier update: We require your assistance. No tricks, just treats. Please provide the files by Friday.",
+      "http_status": 200,
+      "seconds": 2.7,
+      "result": "Rewritten draft:\n\nPlease send the files by Friday.\n\nWhat changed and why\n\n- “We require your assistance” → “Please send”  \n  Swapped formal, indirect wording for plain English and a clear ask.\n\n- “Please provide the files” → “Please send the files”  \n  Used a simpler, more natural verb.\n\n- Removed “No tricks, just treats.”  \n  Cut playful marketing language because it doesn’t fit a supplier email.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "review": {
+        "status": "passed_core_check",
+        "observations": [
+          "Kept the Friday deadline and the supplier request.",
+          "Removed the seasonal phrase because of the context, without a taste verdict."
+        ]
+      }
+    },
+    {
+      "name": "Sensitive writing goes to a person",
+      "draft": "I feel ashamed about my debt and it is affecting my mental health.",
+      "http_status": 200,
+      "seconds": 3.6,
+      "result": "This touches on money shame and mental health, so I wouldn’t rewrite it into brand voice.\n\nIf you need to send this to someone, I’d keep it plain and human:\n\n**I’m struggling with debt, and it’s affecting my mental health.**\n\nWhat changed:\n- **“I feel ashamed about my debt and it is affecting my mental health”** → **“I’m struggling with debt, and it’s affecting my mental health.”**  \n  Why: it says the same thing more plainly and naturally, without adding polish where a human response matters more.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "review": {
+        "status": "failed_core_check",
+        "observations": [
+          "Said it would not rewrite into brand voice but then supplied a rewrite.",
+          "Changed feel ashamed about my debt to struggling with debt. Those meanings differ.",
+          "Did not refer the draft for handling by a person as instructed."
+        ]
+      }
+    },
+    {
+      "name": "Operational rewrite preserves its commitment",
+      "draft": "We would like to apologise for the delay. A replacement card will be sent by us within 5 working days. We will provide an update when it has been dispatched.",
+      "http_status": 200,
+      "seconds": 4.7,
+      "result": "We’re sorry for the delay.\n\nWe’ll send your replacement card within 5 working days. We’ll update you when we’ve dispatched it.\n\n**What changed**\n- **“We would like to apologise” → “We’re sorry”**  \n  Shorter, clearer, and more direct.\n\n- **“A replacement card will be sent by us” → “We’ll send your replacement card”**  \n  Changed passive voice to active voice and named who’s doing it.\n\n- **“We will provide an update when it has been dispatched” → “We’ll update you when we’ve dispatched it”**  \n  Used contractions and active voice to make it sound more natural.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "review": {
+        "status": "passed_core_check",
+        "observations": [
+          "Used contractions and active voice.",
+          "Kept the promise to send a replacement card within 5 working days."
+        ]
+      }
+    },
+    {
+      "name": "Cost minimisation is flagged",
+      "draft": "You won't pay Monzo Investments fees, just ongoing fund management costs.",
+      "http_status": 200,
+      "seconds": 2,
+      "result": "This line needs a compliance check rather than a style rewrite.\n\n**Draft**\nYou won't pay Monzo Investments fees, just ongoing fund management costs.\n\n**What changed**\n- No rewrite made.\n- Why: **just** in front of a cost can minimise a charge the reader will actually pay, so this should be reviewed by a person rather than changed for style.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "review": {
+        "status": "passed_core_check",
+        "observations": [
+          "Retained the cost wording and flagged just for human review."
+        ]
+      }
+    },
+    {
+      "name": "Third-party attribution stays intact",
+      "draft": "Your insurance is provided by Zurich. If you require assistance, please contact us.",
+      "http_status": 200,
+      "seconds": 1.9,
+      "result": "Your insurance is provided by Zurich. If you need help, please contact us.\n\nWhat changed and why\n\n- require assistance → need help  \n  Swapped formal wording for plainer, more natural language.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+      "review": {
+        "status": "passed_core_check",
+        "observations": [
+          "Kept the Zurich attribution unchanged.",
+          "Changed require assistance to need help."
+        ]
+      }
+    }
+  ],
+  "browser_check": {
+    "draft": "We would like to apologise for the delay. A replacement card will be sent by us within 5 working days. We will provide an update when it has been dispatched.",
+    "http_status": 200,
+    "result": "We're sorry for the delay.\n\nWe'll send your replacement card within 5 working days. We'll let you know when we've sent it.\n\nWhat I changed\n\n- “We would like to apologise” → “We’re sorry”\n  - It’s more direct and human.\n\n- “A replacement card will be sent by us” → “We’ll send your replacement card”\n  - It uses active voice and makes clear who’s doing what.\n\n- “We will provide an update when it has been dispatched” → “We’ll let you know when we’ve sent it”\n  - It uses simpler words and sounds more natural.\n\nThis checked the writing, not the facts, the figures, or whether any claim is accurate or compliant.",
+    "copied_complete_result": true,
+    "browser_errors": []
+  },
+  "summary": {
+    "live_requests_completed": 10,
+    "all_http_200": true,
+    "all_answers_end_with_boundary_line": true,
+    "ready_against_supplied_brief": false,
+    "issues": [
+      "Sensitive-topic refusal failed and changed the meaning.",
+      "Plain-English changes were inconsistent.",
+      "Added quality commentary and varied the requested note format."
+    ],
+    "limits": "Short synthetic examples, one response per test case and one repeated operational draft through the browser. These results do not establish consistent behaviour, factual accuracy or compliance.",
+    "prompt_changed": false
+  }
+}

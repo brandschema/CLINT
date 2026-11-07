@@ -1,0 +1,160 @@
+brand: monzo
+source: monzo.com/tone-of-voice
+captured: 2026-06-14
+extracted: 2026-11-05
+
+principles:
+  straightforward_kindness:
+    definition: Clear, inclusive, focused on the reader. Make complex things simple.
+    scope: always
+  everyday_magic:
+    definition: Transform the mundane with moments of unexpected delight.
+    scope: brand and marketing writing
+  warm_wit:
+    definition: Humour as a delicate seasoning. People part of the joke, not its target.
+    scope: brand and marketing writing
+
+scale: [none, low, medium, high, maxed_out]
+
+channels:
+  operational:
+    covers: [email, legal, web_page, notification, in_app]
+    kindness: maxed_out
+    magic: low
+    wit: none
+    override: "negative news or any doubt -> keep it simple"
+  customer_service:
+    covers: [in_app_chat, help_content, self_serve]
+    kindness: high
+    magic: low
+    wit: none
+    override: "risk of getting wit wrong exceeds benefit of getting it right"
+  marketing:
+    covers: [email, web_page, notification, in_app]
+    kindness: high
+    magic: medium
+    wit: medium
+    override: "notifications sacrifice wit for brevity"
+  campaigns:
+    kindness: high
+    magic: high
+    wit: high
+  paid_social:
+    kindness: high
+    magic: high
+    wit: high
+  organic_social:
+    covers: [tiktok, instagram, linkedin, threads, x]
+    kindness: high
+    magic: high
+    wit: maxed_out
+
+lexicon:
+  swap:
+    assistance: help
+    require: need
+    enable: let
+    obtain: get
+    provide: give
+    request: ask
+    resolve: fix
+    therefore: so
+    utilise: use
+    however: but
+  swap_harmful:
+    blacklist: blocklist
+    whitelist: allowlist
+  remove_adjectives: [great, fun, simple, helpful, quick, easy, handy]
+  avoid_words:
+    simply: "Simply tap on a Pot to give it a new name"
+    just: "Just share your link with a friend"
+    discover: "Discover the benefits of Monzo"
+    and_much_more: "Features to help you spend, save, and much more"
+  avoid_phrases:
+    - "We've made it even easier to"
+    - "We designed [new thing] to"
+    - "Ever wanted to [have this good thing]?"
+    - "Whether you want to [this] or [that]"
+  banned_strings:
+    - "We'd like to apologise"
+    - "Eggcellent"
+    - "all wrapped up"
+    - "no tricks, just treats"
+    - "hey presto"
+    - "even your mum could use it"
+  banned_emoji: ["\U0001FA84"]
+  permitted_sentence_openers: [but, and, so, because]
+
+rules:
+  hard:
+    - name_who_is_responsible
+    - apologise_once_only
+    - no_apology_when_not_at_fault
+    - explain_technical_terms_at_first_use
+    - max_two_jokes_per_piece
+    - no_reference_narrower_than: [barbie, olympics, love_island, suez_canal_ship]
+  structural:
+    - impact_before_reasoning
+    - open_on_what_reader_cares_about
+    - draft_as_bullets_first
+    - sensitive_subject_means_warmer_not_more_formal
+  framing:
+    rule: >
+      The governing metaphor chosen early constrains every conclusion that
+      follows, and readers will not notice it happening. Before drafting, name
+      the implied frame and ask whether a different frame would lead the reader
+      somewhere else.
+    evidence: >
+      Thibodeau and Boroditsky, PLoS ONE 2011. Crime framed as a beast in a
+      fictional city produced 71% support for enforcement; framed as a virus,
+      54%. Of 485 participants only 15 named the metaphor as the influence.
+    machine_checkable: false
+  refuse:
+    topics: [money_shame, mental_health, financial_hardship]
+    reason: "best shared by a customer in their own words, or led by the vulnerable customers team"
+  avoid_topics: [politics, celebrity_health, live_court_cases]
+
+emotional_palette:
+  - emotion: joy_with_smugness
+    trigger: when you get paid, and you're a prince for a day
+  - emotion: guilt
+    trigger: when you spend too much on takeaways
+  - emotion: awkwardness
+    trigger: when someone owes you money
+  - emotion: pride
+    trigger: when you're organised and do boring admin
+  - emotion: bemusement
+    trigger: when silly things happen, like when the price of a Freddo spikes
+
+few_shot_pairs: 6   # see the paired examples section; use them verbatim
+
+# Checkability map, added by Brand Schema. Not part of Monzo's guidelines.
+# string        = exact or case-insensitive match, no model call needed
+# regex         = pattern match, needs tokenising or sentence splitting
+# model         = judgement call, needs an LLM pass
+# not_checkable = describes a drafting process, leaves no trace in the output
+linter:
+  lexicon.swap: string
+  lexicon.swap_harmful: string
+  lexicon.remove_adjectives: string
+  lexicon.avoid_words: string
+  lexicon.avoid_phrases: regex          # bracketed slots are placeholders, not literals
+  lexicon.banned_strings: string
+  lexicon.banned_emoji: string
+  lexicon.permitted_sentence_openers: regex
+  rules.hard.name_who_is_responsible: model
+  rules.hard.apologise_once_only: regex
+  rules.hard.no_apology_when_not_at_fault: model
+  rules.hard.explain_technical_terms_at_first_use: model
+  rules.hard.max_two_jokes_per_piece: model
+  rules.hard.no_reference_narrower_than: model
+  rules.structural.impact_before_reasoning: model
+  rules.structural.open_on_what_reader_cares_about: model
+  rules.structural.draft_as_bullets_first: not_checkable
+  rules.structural.sensitive_subject_means_warmer_not_more_formal: model
+  rules.framing: model
+  rules.refuse: model
+  rules.avoid_topics: model
+  channels: model                       # the kindness/magic/wit scale has no defined measure
+  principles: model
+  emotional_palette: model

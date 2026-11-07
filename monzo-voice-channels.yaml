@@ -1,0 +1,293 @@
+# Monzo voice: channel settings
+# Companion to monzo-voice-rules.yaml. Changes on a different cycle from the rules:
+# a new channel is a settings change, a new rule is a rule change.
+#
+# ALL FIGURES GATED. Only <p> blocks with >=5 words ending in terminal punctuation
+# are measured. See measure-voice.js. Ungated figures are not comparable and the
+# earlier version of this file carried them.
+#
+# measured: true   derived from the corpus
+# measured: false  proposed by reasoning, not by counting. Argue with these freely.
+# null             no corpus. The linter declines, it does not fall back.
+
+meta:
+  corpus_collected: 2026-11-06
+  corpus_pages: 50
+  corpus_sentences: 1960
+  corpus_words: 33167
+  gate: ">=5 words and terminal punctuation, <p> only"
+  script: measure-voice.js
+
+# How a piece gets its channel. First match wins.
+# Fallback is operational_legal, per Monzo's own override: if in any doubt, keep it simple.
+classification:
+  tests:
+    - when: carries bad news, a charge, a refusal, a loss, or legal terms
+      channel: operational_legal
+    - when: the reader is trying to solve a problem
+      channel: customer_service
+    - when: selling or explaining a product
+      channel: marketing
+    - when: research or editorial under the brand's name
+      channel: editorial_consumer
+    - when: signed by a named engineer or recruiter
+      channel: editorial_technical
+  fallback: operational_legal
+
+# --------------------------------------------------------------------------
+# What actually distinguishes this brand. Measured against four UK competitors.
+# Sentence length does NOT: five brands sit inside 1.7 words on the mean.
+# These three do, and Monzo leads all three.
+# --------------------------------------------------------------------------
+differentiators:
+  contractions_per_100w:
+    monzo_marketing: 3.19
+    field: {lloyds: 1.97, barclays: 2.06, vanguard_uk: 2.08, revolut: 0.64}
+    note: Monzo is 53% above the tightest cluster of three.
+  passives_per_100s:
+    monzo_marketing: 3.6
+    field: {vanguard_uk: 6.4, barclays: 9.6, lloyds: 11.5, revolut: 15.6}
+    note: Widest single gap. Monzo is a third of the nearest bank.
+  connective_openers_pct:
+    monzo_marketing: 3.8
+    field: {vanguard_uk: 1.6, lloyds: 0.4, barclays: 0.0, revolut: 0.0}
+    note: Barclays and Revolut do it zero times in 626 sentences.
+  not_a_differentiator:
+    sentence_mean: {monzo: 14.0, lloyds: 13.2, barclays: 14.5, revolut: 14.9, vanguard_uk: 14.6}
+    note: >
+      Treat sentence length as a readability check, never as a brand check.
+      Every UK bank writes 13 to 15 word sentences.
+
+channels:
+
+  marketing:
+    measured: true
+    monzo_matrix: {kindness: high, magic: medium, wit: medium}
+    sentence_centre_words: 13
+    sentence_scrutiny_above: 23
+    paragraph_max_sentences: 3
+    contraction_floor_per_100w: 2.8
+    passive_ceiling_per_100s: 4.0
+    dashes_permitted: true
+    semicolons_permitted: false
+    exclamations_per_piece: 1
+    you_to_we_floor: 3.0
+    first_person_singular: false
+    jokes_per_piece: 2
+    observed:
+      sentences: 577
+      words: 8077
+      mean: 14.0
+      median: 13
+      p90: 23
+      pct_le_10: 36.4
+      contractions_per_100w: 3.19
+      passives_per_100s: 3.6
+      connective_openers_pct: 3.8
+      you_per_1000w: 71.1
+      we_per_1000w: 10.6
+      dashes_per_100s: 6.8
+      word_list_per_10000w: 3.7
+
+  customer_service:
+    measured: true
+    monzo_matrix: {kindness: high, magic: low, wit: none}
+    sentence_centre_words: 15
+    sentence_scrutiny_above: 27
+    paragraph_max_sentences: 3
+    contraction_floor_per_100w: 2.8     # currently FAILING at 2.14, see note
+    passive_ceiling_per_100s: 5.5
+    dashes_permitted: false
+    semicolons_permitted: false
+    exclamations_per_piece: 1
+    you_to_we_floor: 2.0
+    first_person_singular: false
+    jokes_per_piece: 0
+    note: >
+      Help content runs 2.14 contractions per 100 words, inside the Lloyds to
+      Vanguard band of 1.97 to 2.08. On this register Monzo's voice is currently
+      indistinguishable from the competition. The floor is set aspirationally at
+      the marketing level rather than at the observed value, so this rule will
+      fire on existing content. That is intended.
+    observed:
+      sentences: 341
+      words: 5414
+      mean: 15.9
+      median: 15
+      p90: 27
+      contractions_per_100w: 2.14
+      passives_per_100s: 5.6
+      connective_openers_pct: 2.6
+      you_per_1000w: 76.7
+      we_per_1000w: 29.6
+      word_list_per_10000w: 7.4
+
+  operational_legal:
+    measured: true
+    monzo_matrix: {kindness: maxed_out, magic: low, wit: none}
+    sentence_centre_words: 17
+    sentence_scrutiny_above: 28
+    paragraph_max_sentences: 4
+    contraction_floor_per_100w: 3.2
+    passive_ceiling_per_100s: 8.0
+    dashes_permitted: false
+    semicolons_permitted: false
+    exclamations_per_piece: 0
+    you_to_we_floor: 1.5
+    first_person_singular: false
+    jokes_per_piece: 0
+    note: >
+      The terms and conditions are 69% MORE contracted than the help content,
+      3.62 against 2.14. The most legally constrained writing on the estate is
+      also the most spoken. Enforce the spokenness floor harder here, not softer:
+      this is where drift is most likely and most costly.
+    observed:
+      sentences: 324
+      words: 5716
+      mean: 17.6
+      median: 17
+      p90: 28
+      paragraph_sentences_p90: 4
+      contractions_per_100w: 3.62
+      passives_per_100s: 7.7
+      you_per_1000w: 75.4
+      we_per_1000w: 42.3
+      word_list_per_10000w: 17.5
+
+  brand:
+    measured: true
+    monzo_matrix: null      # internal; the guidelines document itself
+    sentence_centre_words: 17
+    sentence_scrutiny_above: 26
+    paragraph_max_sentences: 3
+    contraction_floor_per_100w: 3.6
+    passive_ceiling_per_100s: 3.5
+    dashes_permitted: true
+    semicolons_permitted: false
+    you_to_we_floor: null   # the brand instructing its own staff
+    first_person_singular: false
+    note: >
+      One page, 175 sentences. Smallest sample. Use /tone-of-voice as the standing
+      false-positive canary: run it through the word list and it must come back
+      clean. 16 raw hits, all of them the brand quoting its own rule.
+    observed:
+      sentences: 175
+      words: 3017
+      mean: 17.2
+      median: 17
+      contractions_per_100w: 4.11
+      passives_per_100s: 2.9
+      connective_openers_pct: 13.7
+
+  editorial_consumer:
+    measured: false         # settings proposed; observations are real
+    monzo_matrix: null
+    proposed_matrix: {kindness: high, magic: medium, wit: low}
+    sentence_centre_words: 19
+    sentence_scrutiny_above: 31
+    paragraph_max_sentences: 4
+    contraction_floor_per_100w: 2.8    # currently FAILING at 1.96
+    passive_ceiling_per_100s: 4.0      # deliberately below the observed 14.8
+    dashes_permitted: true
+    semicolons_permitted: false
+    exclamations_per_piece: 1
+    you_to_we_floor: 1.5
+    first_person_singular: false
+    jokes_per_piece: 1
+    note: >
+      A marketing artefact with no entry in the brand's own channel matrix, and
+      the worst passive rate on the estate at 14.8 per 100 sentences, four times
+      marketing. The ceiling is set against the data on purpose: adopting the
+      observed rate would write the drift into the standard.
+    observed:
+      sentences: 176
+      words: 3371
+      mean: 19.2
+      median: 19
+      p90: 31
+      pct_ge_25: 24.4
+      contractions_per_100w: 1.96
+      passives_per_100s: 14.8
+      connective_openers_pct: 10.2
+      word_list_per_10000w: 11.9
+
+  editorial_technical:
+    measured: false         # settings proposed; observations are real
+    monzo_matrix: null
+    proposed_matrix: {kindness: high, magic: low, wit: low}
+    sentence_centre_words: 20
+    sentence_scrutiny_above: 33
+    paragraph_max_sentences: 3
+    contraction_floor_per_100w: 2.8    # currently FAILING at 1.95
+    passive_ceiling_per_100s: 5.5      # deliberately below the observed 9.8
+    dashes_permitted: true
+    semicolons_permitted: false
+    exclamations_per_piece: 1
+    you_to_we_floor: null              # legitimately inverts, the piece is about the brand
+    first_person_singular: true        # if signed
+    jokes_per_piece: 1
+    note: >
+      Longer sentences and first person singular are correct for the job. The
+      vocabulary and agency rules are not relaxed: this register carries the
+      highest word-list rate on the estate at 18.5 per 10,000 words and 8 of the
+      8 connective "however" found anywhere.
+    observed:
+      sentences: 367
+      words: 7572
+      mean: 20.6
+      median: 20
+      p90: 33
+      pct_ge_25: 31.6
+      contractions_per_100w: 1.95
+      passives_per_100s: 9.8
+      i_per_1000w: 14.8
+      word_list_per_10000w: 18.5
+
+  # --- Not measured. Decline rather than substitute. ---
+
+  campaigns:
+    measured: null
+    monzo_matrix: {kindness: high, magic: high, wit: high}
+    reason: Above and through-the-line. Not on the website.
+    on_request: decline, state that no corpus exists
+
+  paid_social:
+    measured: null
+    monzo_matrix: {kindness: high, magic: high, wit: high}
+    reason: Served in ad platforms. Identical matrix settings to campaigns.
+    on_request: decline, state that no corpus exists
+
+  organic_social:
+    measured: null
+    monzo_matrix: {kindness: high, magic: high, wit: maxed_out}
+    reason: >
+      The only channel rated maxed out for anything, so the furthest from
+      everything measured. The two-joke ceiling is undetermined here.
+      Collectable from public accounts without inside access: highest-value gap.
+    on_request: decline, state that no corpus exists
+
+  app:
+    measured: null
+    monzo_matrix: {kindness: maxed_out, magic: low, wit: none}
+    reason: >
+      In-app copy, in-app chat, notifications, email. Rated maxed out for
+      kindness and entirely unmeasured. Probably where most customer-read words
+      live. Needs an export from inside the business.
+    on_request: decline, state that no corpus exists
+
+  internal:
+    measured: null
+    monzo_matrix: null
+    reason: >
+      Memos, presentations, supplier correspondence. No public source exists.
+      The brand's guidelines do cover it ("this principle applies to our internal
+      communications too") but nothing measures it.
+    transfers: >
+      Contractions, paragraph ceiling, impact-before-reasoning, named
+      responsibility, formality-not-rising-with-difficulty, the whole word list.
+    does_not_transfer: >
+      you_to_we_floor (a memo from a named person is legitimately we-heavy and
+      I-heavy), all humour rules, the hardship restriction, the claim rules.
+    on_request: >
+      run the transferring rules as prompts only, with no thresholds, and log
+      what the writer overrides. Twenty pieces in, that is a measured baseline.
